@@ -6,6 +6,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import urllib.request
+from typing import List
+import sys
+
 
 def get_links(url: str):
     """Find all links on page at the given url.
@@ -32,13 +35,44 @@ def get_links(url: str):
     [url_without_dupe.append(x) for x in url_list if x not in url_without_dupe]
     return url_without_dupe
 
+
 def is_valid_url(url: str):
     """Test if a url is valid & reachable"""
     # The connection is closed as soon as you receive your response
     # so you don't need to close the connection yourself.
+    if 'http' not in url:
+        url = 'https://' + url
     status_code = urllib.request.urlopen(url).getcode()
     if status_code == 200:
         return True
 
-# print(get_links('https://www.youtube.com/'))
-# print(is_valid_url('https://www.facebook.com'))
+
+def invalid_urls(urllist: List[str]) -> List[str]:
+    """Validate the urls in urllist and return a new list containing
+    the invalid or unreachable urls.
+    """
+    invalid_list = []
+    for url in urllist:
+        try:
+            is_valid_url(url)
+        except:
+            invalid_list.append(url)
+    return invalid_list
+
+
+def main():
+    bad_link_list = []
+    get_url = get_links(sys.argv[1])
+    for urls in get_url:
+        try:
+            if is_valid_url(urls):
+                print(urls)
+        except:
+            bad_link_list.append(urls)
+    print("Bad Links:")
+    for bad in bad_link_list:
+        print(bad)
+    
+
+if __name__ == '__main__':
+    main()
